@@ -74,34 +74,26 @@
         <p class="hint">Warga: login dengan NIK &amp; tanggal lahir (yyyymmdd)<br>Ketua RT/RW: login dengan username ketuart / ketuarw</p>
     </div>
 
-    <!-- Security files dinonaktifkan untuk debugging -->
     <script>
         // Cek jika sudah login
         const sess = JSON.parse(sessionStorage.getItem('rt04_session') || 'null');
         if (sess && sess.exp > Date.now()) location.href = 'index.html';
 
-        // Password hash tidak boleh di-hardcode di client-side
-        // Untuk keamanan, autentikasi harus dilakukan di server-side
-        // Ini adalah implementasi sementara untuk development
-        
-        // Fungsi untuk mendapatkan hash dari localStorage atau default
-        function getPasswordHash(role) {
-            // Coba ambil dari localStorage terlebih dahulu
-            const storedHash = localStorage.getItem(`rt04_${role}_hash`);
-            if (storedHash) return storedHash;
-            
-            // Fallback ke default (hanya untuk development)
-            // Default hash harus diubah di production
-            const defaultHashes = {
-                'admin': '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918', // admin
-                'ketuart': '6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b', // 1
-                'ketuarw': '6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b'  // 1
-            };
-            
-            console.warn(`Menggunakan default hash untuk ${role}. Harap setup password di production.`);
-            return defaultHashes[role] || '';
+        // ============================================================
+        // PASSWORD DISIMPAN SEBAGAI SHA-256 HASH (BUKAN PLAINTEXT)
+        // Untuk ganti password, admin bisa ubah via Admin Settings
+        // ============================================================
+        const DEFAULT_HASHES = {
+            'admin': '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918',
+            'ketuart': '03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4',
+            'ketuarw': '03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4'
+        };
+
+        // Ambil hash: prioritas dari localStorage (jika sudah diganti), fallback ke default
+        function getStoredHash(role) {
+            return localStorage.getItem(`rt04_pwd_${role}`) || DEFAULT_HASHES[role];
         }
-        
+
         const SESSION_DURATION = 2 * 60 * 60 * 1000; // 2 jam
 
         async function sha256(str) {
@@ -127,45 +119,44 @@
                 return;
             }
 
-            // Simplified password check untuk development
-            const adminPassword = 'admin';
-            const ketuaPassword = '1234';
+            // Hash password yang diinput user
+            const passwordHash = await sha256(password);
 
             // Login admin
             if (username.toLowerCase() === 'admin') {
-                if (password === adminPassword) {
+                if (passwordHash === getStoredHash('admin')) {
                     recordLoginAttempt(username, true);
                     setSession({ username: 'admin', role: 'admin', nama: 'Administrator' });
                     location.href = 'index.html?autoload=true';
                 } else {
                     recordLoginAttempt(username, false);
-                    showError(`Password salah. (Use: "${adminPassword}")`);
+                    showError('Password salah.');
                 }
                 return;
             }
 
             // Login Ketua RT
             if (username.toLowerCase() === 'ketuart') {
-                if (password === ketuaPassword) {
+                if (passwordHash === getStoredHash('ketuart')) {
                     recordLoginAttempt(username, true);
                     setSession({ username: 'ketuart', role: 'ketuart', nama: 'Ketua RT 04' });
                     location.href = 'index.html?autoload=true';
                 } else {
                     recordLoginAttempt(username, false);
-                    showError(`Password salah. (Use: "${ketuaPassword}")`);
+                    showError('Password salah.');
                 }
                 return;
             }
 
             // Login Ketua RW
             if (username.toLowerCase() === 'ketuarw') {
-                if (password === ketuaPassword) {
+                if (passwordHash === getStoredHash('ketuarw')) {
                     recordLoginAttempt(username, true);
                     setSession({ username: 'ketuarw', role: 'ketuarw', nama: 'Ketua RW 11' });
                     location.href = 'index.html?autoload=true';
                 } else {
                     recordLoginAttempt(username, false);
-                    showError(`Password salah. (Use: "${ketuaPassword}")`);
+                    showError('Password salah.');
                 }
                 return;
             }
@@ -193,9 +184,9 @@
                 return;
             }
 
-            // Password default: tanggal lahir yyyymmdd
-            const defaultPass = await sha256(getTanggalLahir(warga.tempatTanggalLahir));
-            if (hash === defaultPass) {
+            // Password warga: hash dari tanggal lahir yyyymmdd
+            const expectedHash = await sha256(getTanggalLahir(warga.tempatTanggalLahir));
+            if (passwordHash === expectedHash) {
                 recordLoginAttempt(username, true);
                 setSession({ username: warga.nik, role: 'warga', nama: warga.nama });
                 location.href = 'index.html?autoload=true';
@@ -230,20 +221,18 @@
             el.style.display = 'block';
         }
 
-        // Rate limiting function
+        // Rate limiting: max 5 percobaan per 15 menit
         function checkLoginRateLimit(username) {
             const key = `rt04_login_attempt_${username}`;
             const attempts = JSON.parse(localStorage.getItem(key) || '{"count":0,"time":0}');
             const now = Date.now();
-            const timeWindow = 15 * 60 * 1000; // 15 menit
+            const timeWindow = 15 * 60 * 1000;
             
-            // Reset jika sudah melebihi time window
             if (now - attempts.time > timeWindow) {
                 attempts.count = 0;
                 attempts.time = now;
             }
             
-            // Cek apakah sudah exceed limit (5 attempts)
             if (attempts.count >= 5) {
                 const remainingTime = Math.ceil((timeWindow - (now - attempts.time)) / 1000 / 60);
                 return {
@@ -258,10 +247,8 @@
         // Record login attempt
         function recordLoginAttempt(username, success) {
             if (success) {
-                // Hapus record jika login sukses
                 localStorage.removeItem(`rt04_login_attempt_${username}`);
             } else {
-                // Increment attempt counter
                 const key = `rt04_login_attempt_${username}`;
                 const attempts = JSON.parse(localStorage.getItem(key) || '{"count":0,"time":0}');
                 attempts.count++;
