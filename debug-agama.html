@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Distribusi Agama</title>
+</head>
+<body>
+    <h2>Debug Distribusi Agama</h2>
+    <div id="agamaDonutChart" style="height: 300px; border: 1px solid #ccc; padding: 20px;"></div>
+    <div id="debug-info"></div>
+
+    <script>
+        let wargaData = [];
+
+        // Load data
+        fetch('data.json')
+            .then(response => response.json())
+            .then(data => {
+                wargaData = data;
+                console.log('Data loaded:', wargaData.length, 'records');
+                debugAgama();
+                renderDonutChart();
+            })
+            .catch(error => {
+                console.error('Error loading data:', error);
+                document.getElementById('debug-info').innerHTML = '<p style="color: red;">Error loading data: ' + error + '</p>';
+            });
+
+        function debugAgama() {
+            const agama = {};
+            wargaData.forEach(w => { 
+                const a = w.agama || 'Tidak Diketahui'; 
+                agama[a] = (agama[a] || 0) + 1; 
+            });
+            
+            console.log('Agama distribution:', agama);
+            document.getElementById('debug-info').innerHTML = '<h3>Debug Info:</h3><pre>' + JSON.stringify(agama, null, 2) + '</pre>';
+        }
+
+        function renderDonutChart() {
+            const agama = {};
+            wargaData.forEach(w => { 
+                const a = w.agama || 'Tidak Diketahui'; 
+                agama[a] = (agama[a] || 0) + 1; 
+            });
+            
+            const data = Object.entries(agama).slice(0, 5).map(([k, v]) => ({label: k, value: v}));
+            const colors = ['#3498db', '#e74c3c', '#f39c12', '#1abc9c', '#9b59b6'];
+            
+            console.log('Chart data:', data);
+            renderDonutChartSVG('agamaDonutChart', data, colors);
+        }
+
+        function renderDonutChartSVG(elementId, data, colors) {
+            const total = data.reduce((sum, d) => sum + d.value, 0);
+            console.log('Total:', total);
+            
+            if (total === 0) {
+                document.getElementById(elementId).innerHTML = '<p>No data available</p>';
+                return;
+            }
+            
+            const size = 280;
+            const center = size / 2;
+            const radius = 80;
+            const innerRadius = 50;
+            
+            let currentAngle = 0;
+            let paths = '';
+            let legends = '';
+            
+            data.forEach((d, i) => {
+                const percentage = (d.value / total) * 100;
+                const angle = (d.value / total) * 360;
+                const endAngle = currentAngle + angle;
+                
+                const x1 = center + radius * Math.cos((currentAngle - 90) * Math.PI / 180);
+                const y1 = center + radius * Math.sin((currentAngle - 90) * Math.PI / 180);
+                const x2 = center + radius * Math.cos((endAngle - 90) * Math.PI / 180);
+                const y2 = center + radius * Math.sin((endAngle - 90) * Math.PI / 180);
+                
+                const ix1 = center + innerRadius * Math.cos((currentAngle - 90) * Math.PI / 180);
+                const iy1 = center + innerRadius * Math.sin((currentAngle - 90) * Math.PI / 180);
+                const ix2 = center + innerRadius * Math.cos((endAngle - 90) * Math.PI / 180);
+                const iy2 = center + innerRadius * Math.sin((endAngle - 90) * Math.PI / 180);
+                
+                const largeArc = angle > 180 ? 1 : 0;
+                
+                if (angle > 0) {
+                    paths += `<path d="M ${x1} ${y1} A ${radius} ${radius} 0 ${largeArc} 1 ${x2} ${y2} L ${ix2} ${iy2} A ${innerRadius} ${innerRadius} 0 ${largeArc} 0 ${ix1} ${iy1} Z" fill="${colors[i]}" stroke="white" stroke-width="2" title="${d.label}: ${d.value} (${percentage.toFixed(1)}%)"></path>`;
+                }
+                
+                legends += `<div style="display: flex; align-items: center; margin-bottom: 0.8rem;"><div style="width: 16px; height: 16px; background: ${colors[i]}; margin-right: 0.8rem; border-radius: 3px;"></div><span style="font-size: 0.9rem; color: #666;">${d.label}: ${d.value}</span></div>`;
+                
+                currentAngle = endAngle;
+            });
+            
+            document.getElementById(elementId).innerHTML = `
+                <div style="display: flex; align-items: center; justify-content: center; gap: 2rem;">
+                    <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
+                        ${paths}
+                    </svg>
+                    <div style="flex: 1;">
+                        ${legends}
+                    </div>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>

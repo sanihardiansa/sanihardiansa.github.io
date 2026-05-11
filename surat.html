@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Surat Masuk - RT04</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>Surat Masuk RT04</h1>
+    
+    <div>
+        <button onclick="addSample()">Add Sample</button>
+        <button onclick="clearData()">Clear All</button>
+    </div>
+    
+    <p>Total Records: <span id="count">0</span></p>
+    
+    <div id="dataTable"></div>
+    
+    <script>
+        let suratData = JSON.parse(localStorage.getItem('suratMasukData')) || [];
+        
+        // Initialize with sample data if empty
+        if (suratData.length === 0) {
+            suratData = [
+                {
+                    id: 1,
+                    tanggal: '2025-12-15',
+                    nomor: '001/RT04/XII/2025',
+                    perihal: 'Undangan Rapat Bulanan',
+                    tujuan: 'Seluruh Warga RT 04',
+                    penandatangan: 'Ketua RT 04'
+                },
+                {
+                    id: 2,
+                    tanggal: '2025-12-14',
+                    nomor: '002/RT04/XII/2025',
+                    perihal: 'Pemberitahuan Iuran Bulanan',
+                    tujuan: 'Warga RT 04',
+                    penandatangan: 'Bendahara RT 04'
+                },
+                {
+                    id: 3,
+                    tanggal: '2025-12-13',
+                    nomor: '003/RT04/XII/2025',
+                    perihal: 'Jadwal Kerja Bakti',
+                    tujuan: 'Kepala Keluarga RT 04',
+                    penandatangan: 'Ketua RT 04'
+                }
+            ];
+            localStorage.setItem('suratMasukData', JSON.stringify(suratData));
+        }
+        
+        function loadData() {
+            document.getElementById('count').textContent = suratData.length;
+            
+            if (suratData.length === 0) {
+                document.getElementById('dataTable').innerHTML = '<p>No data found</p>';
+                return;
+            }
+            
+            let html = '<table><tr><th>No</th><th>Tanggal</th><th>Nomor</th><th>Perihal</th><th>Tujuan</th><th>Penandatangan</th></tr>';
+            suratData.forEach((s, i) => {
+                html += `<tr>
+                    <td>${i+1}</td>
+                    <td>${s.tanggal || '-'}</td>
+                    <td>${s.nomor || '-'}</td>
+                    <td>${s.perihal || '-'}</td>
+                    <td>${s.tujuan || '-'}</td>
+                    <td>${s.penandatangan || '-'}</td>
+                </tr>`;
+            });
+            html += '</table>';
+            document.getElementById('dataTable').innerHTML = html;
+        }
+        
+        function addSample() {
+            const sample = {
+                id: Date.now(),
+                tanggal: '2025-12-16',
+                nomor: '001/RT04/XII/2025',
+                perihal: 'Surat Test',
+                tujuan: 'RT 04',
+                penandatangan: 'Ketua RT'
+            };
+            
+            suratData.push(sample);
+            localStorage.setItem('suratMasukData', JSON.stringify(suratData));
+            loadData();
+            alert('Sample data added!');
+        }
+        
+        function clearData() {
+            if (confirm('Clear all data?')) {
+                suratData = [];
+                localStorage.setItem('suratMasukData', JSON.stringify(suratData));
+                loadData();
+            }
+        }
+        
+        // Auto load data when page loads
+        window.onload = function() {
+            loadData();
+        };
+    </script>
+</body>
+</html>

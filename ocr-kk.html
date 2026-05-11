@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OCR Kartu Keluarga</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .upload-area { border: 2px dashed #ccc; padding: 20px; text-align: center; margin: 20px 0; }
+        .result { background: #f9f9f9; padding: 15px; border-radius: 5px; margin: 20px 0; }
+        button { background: #3498db; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; }
+        button:hover { background: #2980b9; }
+        #status { margin: 10px 0; font-weight: bold; }
+        textarea { width: 100%; height: 200px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>OCR Kartu Keluarga</h1>
+        
+        <div class="upload-area">
+            <p>Pilih file PDF Kartu Keluarga:</p>
+            <input type="file" id="pdfFile" accept=".pdf" />
+            <p><small>Atau gunakan file: /Users/cinot/MyWork/rt04/kk oma.pdf</small></p>
+        </div>
+        
+        <button onclick="processPDF()">🔍 Proses OCR</button>
+        <div id="status">Siap untuk memproses PDF</div>
+        
+        <div class="result">
+            <h3>Hasil OCR:</h3>
+            <textarea id="ocrResult" placeholder="Hasil OCR akan muncul di sini..."></textarea>
+        </div>
+        
+        <div class="result">
+            <h3>Data Terstruktur:</h3>
+            <textarea id="structuredData" placeholder="Data yang sudah diparse akan muncul di sini..."></textarea>
+        </div>
+        
+        <button onclick="copyToClipboard()">📋 Copy Data</button>
+    </div>
+
+    <!-- Include Tesseract.js for OCR -->
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
+    <!-- Include PDF.js for PDF processing -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+
+    <script>
+        async function processPDF() {
+            const fileInput = document.getElementById('pdfFile');
+            const statusDiv = document.getElementById('status');
+            
+            if (!fileInput.files[0]) {
+                statusDiv.textContent = '❌ Silakan pilih file PDF terlebih dahulu';
+                return;
+            }
+            
+            const file = fileInput.files[0];
+            statusDiv.textContent = '📄 Memuat PDF...';
+            
+            try {
+                // Convert PDF to images
+                const images = await pdfToImages(file);
+                statusDiv.textContent = `🔍 Memproses ${images.length} halaman dengan OCR...`;
+                
+                let allText = '';
+                
+                // Process each page with OCR
+                for (let i = 0; i < images.length; i++) {
+                    statusDiv.textContent = `🔍 Memproses halaman ${i + 1}/${images.length}...`;
+                    
+                    const result = await Tesseract.recognize(images[i], 'ind', {
+                        logger: m => {
+                            if (m.status === 'recognizing text') {
+                                statusDiv.textContent = `🔍 OCR halaman ${i + 1}: ${Math.round(m.progress * 100)}%`;
+                            }
+                        }
+                    });
+                    
+                    allText += `=== HALAMAN ${i + 1} ===\n${result.data.text}\n\n`;
+                }
+                
+                document.getElementById('ocrResult').value = allText;
+                
+                // Parse the OCR result
+                const parsedData = parseKKData(allText);
+                document.getElementById('structuredData').value = JSON.stringify(parsedData, null, 2);
+                
+                statusDiv.textContent = '✅ OCR selesai! Data berhasil diproses.';
+                
+            } catch (error) {
+                statusDiv.textContent = '❌ Error: ' + error.message;
+                console.error('OCR Error:', error);
+            }
+        }
+        
+        async function pdfToImages(file) {
+            const arrayBuffer = await file.arrayBuffer();
+            const pdf = await pdfjsLib.getDocument(arrayBuffer).promise;
+            const images = [];
+            
+            for (let i = 1; i <= pdf.numPages; i++) {
+                const page = await pdf.getPage(i);
+                const viewport = page.getViewport({ scale: 2.0 });
+                
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('2d');
+                canvas.height = viewport.height;
+                canvas.width = viewport.width;
+                
+                await page.render({
+                    canvasContext: context,
+                    viewport: viewport
+                }).promise;
+                
+                images.push(canvas);
+            }
+            
+            return images;
+        }
+        
+        function parseKKData(text) {
+            const data = {
+                noKK: '',
+                alamat: '',
+                rt: '',
+                rw: '',
+                kelurahan: '',
+                kecamatan: '',
+                anggota: []
+            };
+            
+            // Extract basic info using regex patterns
+            const noKKMatch = text.match(/(?:NO\.|NOMOR)?\s*(?:KK|KARTU KELUARGA)[\s:]*(\d{16})/i);
+            if (noKKMatch) data.noKK = noKKMatch[1];
+            
+            const alamatMatch = text.match(/ALAMAT[\s:]*([^\n]+)/i);
+            if (alamatMatch) data.alamat = alamatMatch[1].trim();
+            
+            const rtMatch = text.match(/RT[\s:]*(\d+)/i);
+            if (rtMatch) data.rt = rtMatch[1];
+            
+            const rwMatch = text.match(/RW[\s:]*(\d+)/i);
+            if (rwMatch) data.rw = rwMatch[1];
+            
+            const kelurahanMatch = text.match(/(?:KELURAHAN|KEL)[\s:]*([^\n]+)/i);
+            if (kelurahanMatch) data.kelurahan = kelurahanMatch[1].trim();
+            
+            const kecamatanMatch = text.match(/(?:KECAMATAN|KEC)[\s:]*([^\n]+)/i);
+            if (kecamatanMatch) data.kecamatan = kecamatanMatch[1].trim();
+            
+            // Try to extract family members (this is basic - may need refinement)
+            const lines = text.split('\n');
+            let memberSection = false;
+            
+            for (const line of lines) {
+                if (line.includes('NAMA') && line.includes('HUBUNGAN')) {
+                    memberSection = true;
+                    continue;
+                }
+                
+                if (memberSection && line.trim()) {
+                    // Basic member extraction - needs refinement based on actual KK format
+                    const parts = line.split(/\s{2,}/); // Split by multiple spaces
+                    if (parts.length >= 3) {
+                        data.anggota.push({
+                            nama: parts[0]?.trim() || '',
+                            jenisKelamin: parts[1]?.trim() || '',
+                            statusHubungan: parts[2]?.trim() || ''
+                        });
+                    }
+                }
+            }
+            
+            return data;
+        }
+        
+        function copyToClipboard() {
+            const structuredData = document.getElementById('structuredData');
+            structuredData.select();
+            document.execCommand('copy');
+            alert('Data berhasil di-copy ke clipboard!');
+        }
+    </script>
+</body>
+</html>

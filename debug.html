@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head><title>Debug RT04</title></head>
+<body>
+<h1>RT04 Debug</h1>
+<button onclick="checkData()">Check Data</button>
+<div id="result"></div>
+
+<script>
+function checkData() {
+    let result = '<h3>Debug Results:</h3>';
+    
+    // Check if data exists
+    const suratData = JSON.parse(localStorage.getItem('suratMasukData')) || [];
+    result += '<p>Surat Masuk Data: ' + suratData.length + ' records</p>';
+    
+    const wargaDataRaw = localStorage.getItem('wargaData');
+    result += '<p>Warga Data exists: ' + (wargaDataRaw ? 'Yes' : 'No') + '</p>';
+    
+    // Check localStorage size
+    let totalSize = 0;
+    for (let key in localStorage) {
+        if (localStorage.hasOwnProperty(key)) {
+            totalSize += localStorage[key].length;
+        }
+    }
+    result += '<p>Total localStorage size: ' + Math.round(totalSize/1024) + ' KB</p>';
+    
+    // List all localStorage keys
+    result += '<p>localStorage keys: ' + Object.keys(localStorage).join(', ') + '</p>';
+    
+    document.getElementById('result').innerHTML = result;
+}
+</script>
+</body>
+</html>

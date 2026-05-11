@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - RT 04/RW 11</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #1a237e, #0d47a1);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .login-card {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            width: 100%;
+            max-width: 400px;
+        }
+        .logo { text-align: center; margin-bottom: 1.5rem; }
+        .logo h2 { color: #1a237e; font-size: 1.4rem; margin-top: 0.5rem; }
+        .logo p { color: #666; font-size: 0.9rem; }
+        .form-group { margin-bottom: 1.2rem; }
+        label { display: block; margin-bottom: 0.4rem; font-weight: 500; color: #333; font-size: 0.9rem; }
+        input {
+            width: 100%; padding: 0.75rem 1rem;
+            border: 1px solid #ddd; border-radius: 8px;
+            font-size: 1rem; transition: border 0.2s;
+        }
+        input:focus { outline: none; border-color: #1a237e; }
+        .btn-login {
+            width: 100%; padding: 0.85rem;
+            background: #1a237e; color: white;
+            border: none; border-radius: 8px;
+            font-size: 1rem; font-weight: 600;
+            cursor: pointer; transition: background 0.2s;
+            margin-top: 0.5rem;
+        }
+        .btn-login:hover { background: #0d47a1; }
+        .error {
+            background: #ffebee; color: #c62828;
+            padding: 0.75rem 1rem; border-radius: 8px;
+            font-size: 0.9rem; margin-bottom: 1rem;
+            display: none;
+        }
+        .hint { color: #888; font-size: 0.8rem; margin-top: 1.5rem; text-align: center; }
+    </style>
+</head>
+<body>
+    <div class="login-card">
+        <div class="logo">
+            <img src="logo-rt04.svg" height="60" onerror="this.style.display='none'">
+            <h2>RT 04 / RW 11</h2>
+            <p>Kelurahan Jatihandap, Kec. Mandalajati</p>
+        </div>
+
+        <div class="error" id="errorMsg"></div>
+
+        <div class="form-group">
+            <label>Username / NIK</label>
+            <input type="text" id="username" placeholder="admin atau NIK 16 digit" autocomplete="username">
+        </div>
+        <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="password" placeholder="Password" autocomplete="current-password"
+                onkeypress="if(event.key==='Enter') doLogin()">
+        </div>
+        <button class="btn-login" onclick="doLogin()">Masuk</button>
+        <p class="hint">Warga: login dengan NIK &amp; tanggal lahir (yyyymmdd)<br>Ketua RT/RW: login dengan username ketuart / ketuarw</p>
+    </div>
+
+    <!-- Security files dinonaktifkan untuk debugging -->
+    <script>
+        // Cek jika sudah login
+        const sess = JSON.parse(sessionStorage.getItem('rt04_session') || 'null');
+        if (sess && sess.exp > Date.now()) location.href = 'index.html';
+
+        // Password hash tidak boleh di-hardcode di client-side
+        // Untuk keamanan, autentikasi harus dilakukan di server-side
+        // Ini adalah implementasi sementara untuk development
+        
+        // Fungsi untuk mendapatkan hash dari localStorage atau default
+        function getPasswordHash(role) {
+            // Coba ambil dari localStorage terlebih dahulu
+            const storedHash = localStorage.getItem(`rt04_${role}_hash`);
+            if (storedHash) return storedHash;
+            
+            // Fallback ke default (hanya untuk development)
+            // Default hash harus diubah di production
+            const defaultHashes = {
+                'admin': '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918', // admin
+                'ketuart': '6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b', // 1
+                'ketuarw': '6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b'  // 1
+            };
+            
+            console.warn(`Menggunakan default hash untuk ${role}. Harap setup password di production.`);
+            return defaultHashes[role] || '';
+        }
+        
+        const SESSION_DURATION = 2 * 60 * 60 * 1000; // 2 jam
+
+        async function sha256(str) {
+            const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+            return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        async function doLogin() {
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            const errEl = document.getElementById('errorMsg');
+            errEl.style.display = 'none';
+
+            if (!username || !password) {
+                showError('Username dan password harus diisi.');
+                return;
+            }
+            
+            // Cek rate limiting
+            const rateLimitCheck = checkLoginRateLimit(username);
+            if (!rateLimitCheck.allowed) {
+                showError(rateLimitCheck.message);
+                return;
+            }
+
+            // Simplified password check untuk development
+            const adminPassword = 'admin';
+            const ketuaPassword = '1234';
+
+            // Login admin
+            if (username.toLowerCase() === 'admin') {
+                if (password === adminPassword) {
+                    recordLoginAttempt(username, true);
+                    setSession({ username: 'admin', role: 'admin', nama: 'Administrator' });
+                    location.href = 'index.html?autoload=true';
+                } else {
+                    recordLoginAttempt(username, false);
+                    showError(`Password salah. (Use: "${adminPassword}")`);
+                }
+                return;
+            }
+
+            // Login Ketua RT
+            if (username.toLowerCase() === 'ketuart') {
+                if (password === ketuaPassword) {
+                    recordLoginAttempt(username, true);
+                    setSession({ username: 'ketuart', role: 'ketuart', nama: 'Ketua RT 04' });
+                    location.href = 'index.html?autoload=true';
+                } else {
+                    recordLoginAttempt(username, false);
+                    showError(`Password salah. (Use: "${ketuaPassword}")`);
+                }
+                return;
+            }
+
+            // Login Ketua RW
+            if (username.toLowerCase() === 'ketuarw') {
+                if (password === ketuaPassword) {
+                    recordLoginAttempt(username, true);
+                    setSession({ username: 'ketuarw', role: 'ketuarw', nama: 'Ketua RW 11' });
+                    location.href = 'index.html?autoload=true';
+                } else {
+                    recordLoginAttempt(username, false);
+                    showError(`Password salah. (Use: "${ketuaPassword}")`);
+                }
+                return;
+            }
+
+            // Login warga (NIK)
+            let data = JSON.parse(localStorage.getItem('rt04_wargaData') || '[]');
+            
+            // Jika data kosong, coba fetch dari data.json
+            if (data.length === 0) {
+                try {
+                    const response = await fetch('data.json');
+                    if (response.ok) {
+                        data = await response.json();
+                        localStorage.setItem('rt04_wargaData', JSON.stringify(data));
+                    }
+                } catch (e) {
+                    console.log('Could not fetch data.json:', e);
+                }
+            }
+            
+            const warga = data.find(w => String(w.nik) === username);
+            if (!warga) {
+                recordLoginAttempt(username, false);
+                showError('NIK tidak ditemukan.');
+                return;
+            }
+
+            // Password default: tanggal lahir yyyymmdd
+            const defaultPass = await sha256(getTanggalLahir(warga.tempatTanggalLahir));
+            if (hash === defaultPass) {
+                recordLoginAttempt(username, true);
+                setSession({ username: warga.nik, role: 'warga', nama: warga.nama });
+                location.href = 'index.html?autoload=true';
+            } else {
+                recordLoginAttempt(username, false);
+                showError('Password salah.');
+            }
+        }
+
+        function setSession(user) {
+            sessionStorage.setItem('rt04_session', JSON.stringify({
+                ...user, exp: Date.now() + SESSION_DURATION
+            }));
+        }
+
+        function getTanggalLahir(ttl) {
+            if (!ttl) return '';
+            const bulan = {januari:'01',februari:'02',maret:'03',april:'04',mei:'05',juni:'06',
+                juli:'07',agustus:'08',september:'09',oktober:'10',november:'11',nopember:'11',desember:'12'};
+            try {
+                const parts = ttl.split(',').pop().trim().split(' ');
+                const tgl = parts[0].padStart(2,'0');
+                const bln = bulan[parts[1].toLowerCase()];
+                const thn = parts[2];
+                return thn + bln + tgl; // yyyymmdd
+            } catch(e) { return ''; }
+        }
+
+        function showError(msg) {
+            const el = document.getElementById('errorMsg');
+            el.textContent = msg;
+            el.style.display = 'block';
+        }
+
+        // Rate limiting function
+        function checkLoginRateLimit(username) {
+            const key = `rt04_login_attempt_${username}`;
+            const attempts = JSON.parse(localStorage.getItem(key) || '{"count":0,"time":0}');
+            const now = Date.now();
+            const timeWindow = 15 * 60 * 1000; // 15 menit
+            
+            // Reset jika sudah melebihi time window
+            if (now - attempts.time > timeWindow) {
+                attempts.count = 0;
+                attempts.time = now;
+            }
+            
+            // Cek apakah sudah exceed limit (5 attempts)
+            if (attempts.count >= 5) {
+                const remainingTime = Math.ceil((timeWindow - (now - attempts.time)) / 1000 / 60);
+                return {
+                    allowed: false,
+                    message: `Terlalu banyak percobaan login. Coba lagi dalam ${remainingTime} menit.`
+                };
+            }
+            
+            return { allowed: true, message: '' };
+        }
+
+        // Record login attempt
+        function recordLoginAttempt(username, success) {
+            if (success) {
+                // Hapus record jika login sukses
+                localStorage.removeItem(`rt04_login_attempt_${username}`);
+            } else {
+                // Increment attempt counter
+                const key = `rt04_login_attempt_${username}`;
+                const attempts = JSON.parse(localStorage.getItem(key) || '{"count":0,"time":0}');
+                attempts.count++;
+                attempts.time = Date.now();
+                localStorage.setItem(key, JSON.stringify(attempts));
+            }
+        }
+    </script>
+</body>
+</html>

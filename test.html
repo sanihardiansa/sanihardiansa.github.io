@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Data</title>
+</head>
+<body>
+    <h1>Test Loading Data</h1>
+    <div id="result"></div>
+    <script>
+        fetch('data.json')
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('result').innerHTML = 
+                    `<p>✓ Data loaded: ${data.length} warga</p>
+                     <p>First: ${data[0].nama}</p>`;
+                console.log('Success:', data.length);
+            })
+            .catch(err => {
+                document.getElementById('result').innerHTML = 
+                    `<p style="color:red">✗ Error: ${err}</p>`;
+                console.error('Error:', err);
+            });
+    </script>
+</body>
+</html>

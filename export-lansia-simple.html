@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Export Data Lansia</title>
+</head>
+<body>
+    <h1>Export Data Warga Usia ≥60 Tahun</h1>
+    <p>1. Buka file data.json di text editor</p>
+    <p>2. Copy semua isi file data.json</p>
+    <p>3. Paste di textarea di bawah ini</p>
+    <textarea id="jsonData" placeholder="Paste data.json content here..." style="width: 100%; height: 200px; margin: 10px 0;"></textarea>
+    <br>
+    <button onclick="exportLansiaToExcel()" style="background: #27ae60; color: white; border: none; padding: 1rem 2rem; border-radius: 5px; cursor: pointer; font-size: 16px;">📊 Export Excel (Usia ≥60)</button>
+    <div id="status" style="margin-top: 1rem; font-weight: bold;">Paste data JSON terlebih dahulu</div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script>
+        function exportLansiaToExcel() {
+            const jsonText = document.getElementById('jsonData').value.trim();
+            
+            if (!jsonText) {
+                document.getElementById('status').textContent = '❌ Silakan paste data JSON terlebih dahulu';
+                return;
+            }
+            
+            try {
+                document.getElementById('status').textContent = 'Processing data...';
+                
+                const data = JSON.parse(jsonText);
+                console.log('Data parsed:', data.length, 'records');
+                
+                // Filter warga with age >= 60
+                const lansiaData = data.filter(w => {
+                    const usia = parseInt(w.usia) || 0;
+                    return usia >= 60;
+                });
+                
+                console.log('Filtered lansia:', lansiaData.length, 'records');
+                
+                if (lansiaData.length === 0) {
+                    document.getElementById('status').textContent = '❌ Tidak ada data warga dengan usia ≥60';
+                    return;
+                }
+                
+                // Prepare data for Excel
+                const excelData = lansiaData.map((w, index) => ({
+                    'No': index + 1,
+                    'Nama': w.nama || '',
+                    'Jenis Kelamin': w.jenisKelamin || '',
+                    'TTL': w.tempatTanggalLahir || '',
+                    'Usia': w.usia || '',
+                    'NIK': w.nik || '',
+                    'No KK': w.noKK || '',
+                    'Alamat': w.alamat || '',
+                    'Kedudukan': w.kedudukan || '',
+                    'Agama': w.agama || '',
+                    'Pendidikan': w.pendidikan || '',
+                    'Pekerjaan': w.pekerjaan || '',
+                    'No HP': w.noHP || '',
+                    'Keterangan': w.keterangan || ''
+                }));
+                
+                // Create Excel file
+                const ws = XLSX.utils.json_to_sheet(excelData);
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, 'Lansia 60+');
+                
+                // Download file
+                const filename = 'data-lansia-60plus-' + new Date().toISOString().split('T')[0] + '.xlsx';
+                XLSX.writeFile(wb, filename);
+                
+                document.getElementById('status').textContent = `✅ Export berhasil! Total: ${lansiaData.length} warga usia ≥60 tahun`;
+                
+            } catch (err) {
+                document.getElementById('status').textContent = '❌ Error: ' + err.message;
+                console.error('Error details:', err);
+            }
+        }
+    </script>
+</body>
+</html>

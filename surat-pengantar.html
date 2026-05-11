@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Surat Pengantar - RT04</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>Surat Pengantar RT04</h1>
+    
+    <div>
+        <button onclick="addSample()">Add Sample</button>
+        <button onclick="clearData()">Clear All</button>
+    </div>
+    
+    <p>Total Records: <span id="count">0</span></p>
+    
+    <div id="dataTable"></div>
+    
+    <script>
+        // Load existing data from localStorage
+        let suratData = JSON.parse(localStorage.getItem('suratPengantarData')) || [];
+        
+        // Only add sample data if no data exists
+        if (suratData.length === 0) {
+            suratData = [
+                {
+                    id: 1,
+                    tanggal: '2025-12-15',
+                    nomor: 'SP-001/RT04/XII/2025',
+                    nama: 'Ahmad Suryadi',
+                    keperluan: 'Pembuatan KTP'
+                },
+                {
+                    id: 2,
+                    tanggal: '2025-12-14',
+                    nomor: 'SP-002/RT04/XII/2025',
+                    nama: 'Siti Nurhaliza',
+                    keperluan: 'Surat Keterangan Domisili'
+                }
+            ];
+            localStorage.setItem('suratPengantarData', JSON.stringify(suratData));
+        }
+        
+        function loadData() {
+            document.getElementById('count').textContent = suratData.length;
+            
+            if (suratData.length === 0) {
+                document.getElementById('dataTable').innerHTML = '<p>No data found</p>';
+                return;
+            }
+            
+            let html = '<table><tr><th>No</th><th>Tanggal</th><th>Nomor</th><th>Nama</th><th>Keperluan</th></tr>';
+            suratData.forEach((s, i) => {
+                html += `<tr>
+                    <td>${i+1}</td>
+                    <td>${s.tanggal || '-'}</td>
+                    <td>${s.nomor || '-'}</td>
+                    <td>${s.nama || '-'}</td>
+                    <td>${s.keperluan || '-'}</td>
+                </tr>`;
+            });
+            html += '</table>';
+            document.getElementById('dataTable').innerHTML = html;
+        }
+        
+        function addSample() {
+            const sample = {
+                id: Date.now(),
+                tanggal: '2025-12-16',
+                nomor: 'SP-00' + (suratData.length + 1) + '/RT04/XII/2025',
+                nama: 'Contoh Nama ' + (suratData.length + 1),
+                keperluan: 'Keperluan Test ' + (suratData.length + 1)
+            };
+            
+            suratData.push(sample);
+            localStorage.setItem('suratPengantarData', JSON.stringify(suratData));
+            loadData();
+            alert('Sample data added!');
+        }
+        
+        function clearData() {
+            if (confirm('Clear all data?')) {
+                suratData = [];
+                localStorage.setItem('suratPengantarData', JSON.stringify(suratData));
+                loadData();
+            }
+        }
+        
+        // Auto load data when page loads
+        window.onload = function() {
+            loadData();
+        };
+    </script>
+</body>
+</html>

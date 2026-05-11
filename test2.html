@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test</title></head>
+<body>
+<h1>Test Data Loading</h1>
+<div id="status">Loading...</div>
+<div id="result"></div>
+<script>
+console.log('Script started');
+fetch('data.json')
+    .then(res => {
+        console.log('Fetch success');
+        return res.json();
+    })
+    .then(data => {
+        console.log('Data loaded:', data.length);
+        document.getElementById('status').innerHTML = 'SUCCESS: ' + data.length + ' warga loaded';
+        document.getElementById('result').innerHTML = '<pre>' + JSON.stringify(data[0], null, 2) + '</pre>';
+    })
+    .catch(err => {
+        console.error('Error:', err);
+        document.getElementById('status').innerHTML = 'ERROR: ' + err;
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Informasi RT 04/RW 11</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav>
+        <h1>RT 04/RW 11 Kel. Jatihandap Kec. Mandalajati</h1>
+        <div class="nav-links">
+            <a href="#" onclick="showPage('dashboard'); return false;" class="active">Dashboard</a>
+            <a href="#" onclick="showPage('warga'); return false;">Data Warga</a>
+            <a href="#" onclick="showPage('suratMasuk'); return false;">Surat Masuk</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div id="dashboard" class="page active">
+            <h2>Dashboard</h2>
+            <div class="stats">
+                <div class="stat-card"><h3 id="totalWarga">0</h3><p>Total Warga</p></div>
+                <div class="stat-card"><h3 id="totalKK">0</h3><p>Kepala Keluarga</p></div>
+                <div class="stat-card"><h3 id="lakilaki">0</h3><p>Laki-laki</p></div>
+                <div class="stat-card"><h3 id="perempuan">0</h3><p>Perempuan</p></div>
+            </div>
+            <div class="charts">
+                <div class="chart-card"><h3>Kelompok Usia</h3><div id="ageChart"></div></div>
+                <div class="chart-card"><h3>Pekerjaan</h3><div id="jobChart"></div></div>
+                <div class="chart-card"><h3>Agama</h3><div id="agamaChart"></div></div>
+                <div class="chart-card"><h3>Pendidikan</h3><div id="pendidikanChart"></div></div>
+                <div class="chart-card"><h3>Status Alamat</h3><div id="statusAlamatChart"></div></div>
+                <div class="chart-card"><h3>Keterangan</h3><div id="keteranganChart"></div></div>
+            </div>
+
+            <div id="detailSection" style="display:none; margin-top: 2rem;">
+                <div style="background: white; padding: 1.5rem; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <h3 id="detailTitle"></h3>
+                        <button onclick="closeDetail()" style="background: #e74c3c; color: white; border: none; padding: 0.5rem 1rem; border-radius: 5px; cursor: pointer;">Tutup</button>
+                    </div>
+                    <div class="table-wrapper">
+                        <table id="detailTable">
+                            <thead>
+                                <tr>
+                                    <th>No</th><th>Nama</th><th>L/P</th><th>Usia</th><th>NIK</th>
+                                    <th>No KK</th><th>Alamat</th><th>Kedudukan</th><th>Pekerjaan</th><th>No HP</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-top: 2rem;">
+                <h3 style="color: white; margin-bottom: 1rem; font-size: 1.5rem;">Berita Terkini</h3>
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem;">
+                    <div class="news-column">
+                        <h4 style="background: white; padding: 1rem; border-radius: 10px 10px 0 0; margin: 0; color: #2c3e50; font-weight: 700;">Berita Nasional</h4>
+                        <div id="newsNasional" style="background: white; padding: 1rem; border-radius: 0 0 10px 10px; min-height: 300px;"></div>
+                    </div>
+                    <div class="news-column">
+                        <h4 style="background: white; padding: 1rem; border-radius: 10px 10px 0 0; margin: 0; color: #2c3e50; font-weight: 700;">Berita Daerah</h4>
+                        <div id="newsDaerah" style="background: white; padding: 1rem; border-radius: 0 0 10px 10px; min-height: 300px;"></div>
+                    </div>
+                    <div class="news-column">
+                        <h4 style="background: white; padding: 1rem; border-radius: 10px 10px 0 0; margin: 0; color: #2c3e50; font-weight: 700;">Info Pemerintah</h4>
+                        <div id="newsInfo" style="background: white; padding: 1rem; border-radius: 0 0 10px 10px; min-height: 300px;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="warga" class="page">
+            <h2>Data Warga</h2>
+            <button onclick="showFormWarga()" class="btn-primary" style="background: #3498db; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 5px; cursor: pointer; margin-bottom: 1rem;">+ Tambah Warga</button>
+            
+            <div id="formWarga" style="display:none; background: white; padding: 1.5rem; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 1.5rem;">
+                <h3>Form Tambah Warga</h3>
+                <form id="wargaForm" onsubmit="saveWarga(event)">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div><label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Nama *</label><input type="text" id="namaWarga" required style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 5px;"></div>
+                        <div><label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">L/P *</label><select id="jenisKelaminWarga" required style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 5px;"><option value="">Pilih</option><option value="L">L</option><option value="P">P</option></select></div>
+                        <div><label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">NIK *</label><input type="text" id="nikWarga" required style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 5px;"></div>
+                        <div><label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">No KK *</label><input type="text" id="noKKWarga" required style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 5px;"></div>
+                        <div><label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">TTL *</label><input type="text" id="ttlWarga" required placeholder="Bandung, 1 Januari 1990" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 5px;"></div>
+                        <div><label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Alamat *</label><input type="text" id="alamatWarga" required style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 5px;"></div>
+                        <div><label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Kedudukan *</label><input type="text" id="kedudukanWarga" required style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 5px;"></div>
+                        <div><label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Status Nikah *</label><input type="text" id="statusPernikahanWarga" required style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 5px;"></div>
+                        <div><label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Agama *</label><input type="text" id="agamaWarga" required style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 5px;"></div>
+                        <div><label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Pendidikan *</label><input type="text" id="pendidikanWarga" required style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 5px;"></div>
+                        <div><label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Pekerjaan *</label><input type="text" id="pekerjaanWarga" required style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 5px;"></div>
+                        <div><label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">No HP</label><input type="text" id="noHPWarga" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 5px;"></div>
+                        <div><label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Status Alamat *</label><input type="text" id="statusAlamatWarga" required style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 5px;"></div>
+                        <div><label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Keterangan</label><input type="text" id="keteranganWarga" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 5px;"></div>
+                    </div>
+                    <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                        <button type="submit" style="background: #27ae60; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 5px; cursor: pointer;">Simpan</button>
+                        <button type="button" onclick="hideFormWarga()" style="background: #95a5a6; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 5px; cursor: pointer;">Batal</button>
+                    </div>
+                </form>
+            </div>
+            
+            <input type="text" id="search" placeholder="Cari nama, NIK, No KK, atau alamat..." class="search-box">
+            <div class="table-wrapper">
+                <table id="wargaTable">
+                    <thead>
+                        <tr>
+                            <th>No</th><th>Nama</th><th>L/P</th><th>Usia</th><th>NIK</th>
+                            <th>No KK</th><th>Alamat</th><th>Kedudukan</th><th>Pekerjaan</th><th>No HP</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Surat Masuk -->
+        <div id="suratMasuk" class="page">
+            <h2>Surat Masuk</h2>
+            <button onclick="showFormSurat()" class="btn-primary" style="background: #3498db; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 5px; cursor: pointer; margin-bottom: 1rem;">+ Tambah Surat Masuk</button>
+            
+            <div id="formSurat" style="display:none; background: white; padding: 1.5rem; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 1.5rem;">
+                <h3>Form Surat Masuk</h3>
+                <form id="suratForm" onsubmit="saveSurat(event)">
+                    <div style="margin-bottom: 1rem;">
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Tanggal Surat</label>
+                        <input type="date" id="tglSurat" required style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 5px;">
+                    </div>
+                    <div style="margin-bottom: 1rem;">
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Nomor Surat</label>
+                        <input type="text" id="noSurat" required style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 5px;">
+                    </div>
+                    <div style="margin-bottom: 1rem;">
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Perihal</label>
+                        <input type="text" id="perihal" required style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 5px;">
+                    </div>
+                    <div style="margin-bottom: 1rem;">
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Tujuan Surat</label>
+                        <input type="text" id="tujuan" required style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 5px;">
+                    </div>
+                    <div style="margin-bottom: 1rem;">
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Lampiran</label>
+                        <input type="text" id="lampiran" required style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 5px;">
+                    </div>
+                    <div style="margin-bottom: 1rem;">
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Penandatangan Surat</label>
+                        <input type="text" id="penandatangan" required style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 5px;">
+                    </div>
+                    <div style="margin-bottom: 1rem;">
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Upload File (PDF/JPG) *</label>
+                        <input type="file" id="fileSurat" accept=".pdf,.jpg,.jpeg" required style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 5px;">
+                    </div>
+                    <div style="display: flex; gap: 1rem;">
+                        <button type="submit" style="background: #27ae60; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 5px; cursor: pointer;">Simpan</button>
+                        <button type="button" onclick="hideFormSurat()" style="background: #95a5a6; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 5px; cursor: pointer;">Batal</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="table-wrapper">
+                <table id="suratTable">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Tanggal</th>
+                            <th>Nomor Surat</th>
+                            <th>Perihal</th>
+                            <th>Tujuan</th>
+                            <th>Lampiran</th>
+                            <th>Penandatangan</th>
+                            <th>File</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Modal Viewer -->
+        <div id="fileModal" style="display:none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999;">
+            <div style="position: relative; width: 90%; height: 90%; margin: 2% auto; background: white; border-radius: 10px; padding: 1rem;">
+                <button onclick="closeFileModal()" style="position: absolute; top: 10px; right: 10px; background: #e74c3c; color: white; border: none; padding: 0.5rem 1rem; border-radius: 5px; cursor: pointer; z-index: 10000;">Tutup</button>
+                <iframe id="fileViewer" style="width: 100%; height: 100%; border: none; border-radius: 5px;"></iframe>
+            </div>
+        </div>
+
+        <!-- News Modal -->
+        <div id="newsModal" style="display:none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; overflow-y: auto;">
+            <div style="position: relative; width: 90%; max-width: 800px; margin: 3% auto; background: white; border-radius: 15px; padding: 2rem; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
+                <button onclick="closeNewsModal()" style="position: absolute; top: 15px; right: 15px; background: #e74c3c; color: white; border: none; padding: 0.5rem 1rem; border-radius: 5px; cursor: pointer; font-weight: 600;">Tutup</button>
+                <h2 id="newsDetailTitle" style="color: #2c3e50; margin-bottom: 0.5rem; font-size: 1.8rem; line-height: 1.3; padding-right: 80px;"></h2>
+                <p id="newsDetailMeta" style="color: #7f8c8d; font-size: 0.9rem; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 2px solid #f0f0f0;"></p>
+                <p id="newsDetailContent" style="color: #555; line-height: 1.8; font-size: 1.05rem; margin-bottom: 1.5rem;"></p>
+                <a id="newsDetailLink" href="#" target="_blank" style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 0.75rem 1.5rem; border-radius: 25px; text-decoration: none; font-weight: 600;">Baca Selengkapnya</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let wargaData = [];
+        let allWargaData = [];
+        let filteredData = [];
+        let suratMasukData = JSON.parse(localStorage.getItem('suratMasukData')) || [];
+
+        fetch('data.json')
+            .then(res => res.json())
+            .then(data => {
+                allWargaData = data;
+                wargaData = data.filter(w => !w.keterangan || !w.keterangan.toLowerCase().includes('meninggal'));
+                filteredData = wargaData;
+                console.log('Loaded:', wargaData.length, 'warga (excluding deceased)');
+                updateDashboard();
+                renderTable();
+                loadNews();
+            })
+            .catch(err => console.error('Error:', err));
+
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+            document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        function updateDashboard() {
+            document.getElementById('totalWarga').textContent = wargaData.length;
+            document.getElementById('totalKK').textContent = wargaData.filter(w => w.kedudukan && w.kedudukan.includes('Kepala')).length;
+            document.getElementById('lakilaki').textContent = wargaData.filter(w => w.jenisKelamin === 'L').length;
+            document.getElementById('perempuan').textContent = wargaData.filter(w => w.jenisKelamin === 'P').length;
+
+            const ageGroups = {'0-17': 0, '18-30': 0, '31-45': 0, '46-60': 0, '60+': 0};
+            wargaData.forEach(w => {
+                if (w.usia) {
+                    if (w.usia <= 17) ageGroups['0-17']++;
+                    else if (w.usia <= 30) ageGroups['18-30']++;
+                    else if (w.usia <= 45) ageGroups['31-45']++;
+                    else if (w.usia <= 60) ageGroups['46-60']++;
+                    else ageGroups['60+']++;
+                }
+            });
+            renderChart('ageChart', Object.entries(ageGroups).map(([k, v]) => ({label: k + ' tahun', value: v})));
+
+            const jobs = {};
+            wargaData.forEach(w => { const j = w.pekerjaan || 'Tidak Diketahui'; jobs[j] = (jobs[j] || 0) + 1; });
+            renderChart('jobChart', Object.entries(jobs).sort((a, b) => b[1] - a[1]).slice(0, 8).map(([k, v]) => ({label: k, value: v})));
+
+            const agama = {};
+            wargaData.forEach(w => { const a = w.agama || 'Tidak Diketahui'; agama[a] = (agama[a] || 0) + 1; });
+            renderChart('agamaChart', Object.entries(agama).sort((a, b) => b[1] - a[1]).map(([k, v]) => ({label: k, value: v})));
+
+            const pendidikan = {};
+            wargaData.forEach(w => { const p = w.pendidikan || 'Tidak Diketahui'; pendidikan[p] = (pendidikan[p] || 0) + 1; });
+            renderChart('pendidikanChart', Object.entries(pendidikan).sort((a, b) => b[1] - a[1]).slice(0, 10).map(([k, v]) => ({label: k, value: v})));
+
+            const statusAlamat = {};
+            wargaData.forEach(w => { const s = w.statusAlamat || 'Tidak Diketahui'; statusAlamat[s] = (statusAlamat[s] || 0) + 1; });
+            renderChart('statusAlamatChart', Object.entries(statusAlamat).sort((a, b) => b[1] - a[1]).map(([k, v]) => ({label: k, value: v})));
+
+            const keterangan = {};
+            allWargaData.forEach(w => { const k = w.keterangan || ''; if (k && k !== 'nan') keterangan[k] = (keterangan[k] || 0) + 1; });
+            if (Object.keys(keterangan).length > 0) {
+                renderChart('keteranganChart', Object.entries(keterangan).sort((a, b) => b[1] - a[1]).map(([k, v]) => ({label: k, value: v})));
+            } else {
+                document.getElementById('keteranganChart').innerHTML = '<p style="color:#999;">Tidak ada keterangan</p>';
+            }
+        }
+
+        function renderChart(elementId, data) {
+            const total = data.reduce((sum, d) => sum + d.value, 0);
+            const max = Math.max(...data.map(d => d.value), 1);
+            document.getElementById(elementId).innerHTML = data.map(d => {
+                const percent = ((d.value / total) * 100).toFixed(1);
+                return '<div class="chart-bar" onclick="showDetail(\'' + elementId + '\', \'' + d.label.replace(/'/g, "\\'") + '\')" style="cursor: pointer;"><div class="chart-label">' + d.label + '</div><div class="chart-bar-bg"><div class="chart-bar-fill" style="width: ' + (d.value/max*100) + '%">' + d.value + ' (' + percent + '%)</div></div></div>';
+            }).join('');
+        }
+
+        function showDetail(chartId, label) {
+            let filtered = [];
+            let title = '';
+
+            if (chartId === 'ageChart') {
+                const range = label.replace(' tahun', '').split('-');
+                if (range.length === 2) {
+                    const min = parseInt(range[0]);
+                    const max = parseInt(range[1]);
+                    filtered = wargaData.filter(w => w.usia >= min && w.usia <= max);
+                } else {
+                    filtered = wargaData.filter(w => w.usia > 60);
+                }
+                title = 'Data Warga Usia ' + label;
+            } else if (chartId === 'jobChart') {
+                filtered = wargaData.filter(w => (w.pekerjaan || 'Tidak Diketahui') === label);
+                title = 'Data Warga Pekerjaan: ' + label;
+            } else if (chartId === 'agamaChart') {
+                filtered = wargaData.filter(w => (w.agama || 'Tidak Diketahui') === label);
+                title = 'Data Warga Agama: ' + label;
+            } else if (chartId === 'pendidikanChart') {
+                filtered = wargaData.filter(w => (w.pendidikan || 'Tidak Diketahui') === label);
+                title = 'Data Warga Pendidikan: ' + label;
+            } else if (chartId === 'statusAlamatChart') {
+                filtered = wargaData.filter(w => (w.statusAlamat || 'Tidak Diketahui') === label);
+                title = 'Data Warga Status Alamat: ' + label;
+            } else if (chartId === 'keteranganChart') {
+                filtered = allWargaData.filter(w => w.keterangan === label);
+                title = 'Data Warga Keterangan: ' + label;
+            }
+
+            document.getElementById('detailTitle').textContent = title + ' (' + filtered.length + ' orang)';
+            document.querySelector('#detailTable tbody').innerHTML = filtered.map((w, i) => 
+                '<tr><td>' + (i + 1) + '</td><td>' + w.nama + '</td><td>' + (w.jenisKelamin || '-') + '</td><td>' + (w.usia || '-') + '</td><td>' + w.nik + '</td><td>' + w.noKK + '</td><td>' + w.alamat + '</td><td>' + w.kedudukan + '</td><td>' + w.pekerjaan + '</td><td>' + (w.noHP || '-') + '</td></tr>'
+            ).join('');
+            
+            document.getElementById('detailSection').style.display = 'block';
+            document.getElementById('detailSection').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function closeDetail() {
+            document.getElementById('detailSection').style.display = 'none';
+        }
+
+        function renderTable() {
+            const sorted = filteredData.slice().sort((a, b) => {
+                if (a.alamat !== b.alamat) {
+                    return a.alamat.localeCompare(b.alamat);
+                }
+                return a.nama.localeCompare(b.nama);
+            });
+            document.querySelector('#wargaTable tbody').innerHTML = sorted.map((w, i) => `
+                <tr>
+                    <td>${i + 1}</td><td>${w.nama}</td><td>${w.jenisKelamin || '-'}</td><td>${w.usia || '-'}</td>
+                    <td>${w.nik}</td><td>${w.noKK}</td><td>${w.alamat}</td><td>${w.kedudukan}</td>
+                    <td>${w.pekerjaan}</td><td>${w.noHP || '-'}</td>
+                </tr>
+            `).join('');
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('search').addEventListener('input', (e) => {
+                const q = e.target.value.toLowerCase().trim();
+                if (q === '') {
+                    filteredData = wargaData;
+                } else {
+                    filteredData = wargaData.filter(w => {
+                        // Exact match for NIK and No KK
+                        if (w.nik === q || w.noKK === q) return true;
+                        
+                        // Word-based search for name and address
+                        const namaWords = w.nama.toLowerCase().split(' ');
+                        const alamatWords = w.alamat.toLowerCase().split(' ');
+                        const searchWords = q.split(' ');
+                        
+                        // Check if all search words are found in name or address
+                        const namaMatch = searchWords.every(word => 
+                            namaWords.some(namaWord => namaWord.startsWith(word))
+                        );
+                        const alamatMatch = searchWords.every(word => 
+                            alamatWords.some(alamatWord => alamatWord.startsWith(word))
+                        );
+                        
+                        return namaMatch || alamatMatch;
+                    });
+                }
+                renderTable();
+            });
+        });
+
+        // News Functions
+        async function loadNews() {
+            const newsNasional = [
+                {id: 1, title: 'Pemerintah Luncurkan Program Bantuan Sosial Baru', date: '4 Des 2024', source: 'Kompas', content: 'Pemerintah meluncurkan program bantuan sosial baru untuk masyarakat kurang mampu. Program ini mencakup bantuan pangan, pendidikan, dan kesehatan dengan total anggaran Rp 50 triliun.', link: 'https://www.kompas.com'},
+                {id: 2, title: 'Pembangunan Infrastruktur Desa Terus Digenjot', date: '4 Des 2024', source: 'Detik', content: 'Kementerian Desa terus menggenjot pembangunan infrastruktur di seluruh desa di Indonesia. Target tahun ini adalah 10.000 desa mendapat akses jalan yang lebih baik.', link: 'https://www.detik.com'},
+                {id: 3, title: 'Kementerian Desa Salurkan Dana Desa Tahap II', date: '3 Des 2024', source: 'Antara', content: 'Dana Desa tahap II telah disalurkan ke seluruh desa di Indonesia dengan total Rp 72 triliun. Dana ini akan digunakan untuk pembangunan dan pemberdayaan masyarakat.', link: 'https://www.antaranews.com'}
+            ];
+            
+            const newsDaerah = [
+                {id: 4, title: 'Pemkot Bandung Gelar Musrenbang Kelurahan', date: '4 Des 2024', source: 'Pikiran Rakyat', content: 'Pemerintah Kota Bandung menggelar Musyawarah Perencanaan Pembangunan (Musrenbang) tingkat kelurahan untuk menampung aspirasi warga terkait pembangunan tahun depan.', link: 'https://www.pikiran-rakyat.com'},
+                {id: 5, title: 'Program RT/RW Bersih Diluncurkan di Mandalajati', date: '3 Des 2024', source: 'Tribun Jabar', content: 'Kecamatan Mandalajati meluncurkan program RT/RW Bersih untuk meningkatkan kebersihan lingkungan. Program ini melibatkan seluruh warga dan aparat RT/RW.', link: 'https://jabar.tribunnews.com'},
+                {id: 6, title: 'Kelurahan Jatihandap Raih Penghargaan Terbaik', date: '2 Des 2024', source: 'Radar Bandung', content: 'Kelurahan Jatihandap meraih penghargaan sebagai kelurahan terbaik dalam pengelolaan administrasi kependudukan dari Walikota Bandung.', link: 'https://radarbandung.id'}
+            ];
+            
+            const newsInfo = [
+                {id: 7, title: 'Jadwal Posyandu Bulan Desember 2024', date: '4 Des 2024', source: 'Info RT', content: 'Posyandu RT 04 akan dilaksanakan pada tanggal 10 Desember 2024 pukul 08.00 WIB di Balai RT. Diharapkan seluruh ibu dan balita hadir.', link: '#'},
+                {id: 8, title: 'Pengumuman Iuran Kebersihan Bulan Ini', date: '3 Des 2024', source: 'Info RT', content: 'Iuran kebersihan bulan Desember sebesar Rp 20.000 per KK. Pembayaran dapat dilakukan kepada Bendahara RT paling lambat tanggal 15 Desember 2024.', link: '#'},
+                {id: 9, title: 'Rapat Koordinasi RT/RW Minggu Depan', date: '2 Des 2024', source: 'Info RT', content: 'Rapat koordinasi RT/RW akan dilaksanakan pada hari Minggu, 8 Desember 2024 pukul 19.00 WIB di rumah Ketua RW. Agenda: Persiapan perayaan tahun baru.', link: '#'}
+            ];
+
+            window.allNews = [...newsNasional, ...newsDaerah, ...newsInfo];
+            renderNews('newsNasional', newsNasional);
+            renderNews('newsDaerah', newsDaerah);
+            renderNews('newsInfo', newsInfo);
+        }
+
+        function renderNews(elementId, newsData) {
+            const html = newsData.map(news => 
+                '<div onclick="showNewsDetail(' + news.id + ')" style="padding: 1rem 0; border-bottom: 1px solid #f0f0f0; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.backgroundColor=\'#f8f9ff\'" onmouseout="this.style.backgroundColor=\'transparent\'"><h5 style="color: #2c3e50; margin-bottom: 0.5rem; font-size: 0.95rem; line-height: 1.4;">' + news.title + '</h5><p style="color: #7f8c8d; font-size: 0.8rem; margin: 0;"><span style="color: #667eea; font-weight: 600;">' + news.source + '</span> • ' + news.date + '</p></div>'
+            ).join('');
+            document.getElementById(elementId).innerHTML = html;
+        }
+
+        function showNewsDetail(newsId) {
+            const news = window.allNews.find(n => n.id === newsId);
+            if (news) {
+                document.getElementById('newsDetailTitle').textContent = news.title;
+                document.getElementById('newsDetailMeta').textContent = news.source + ' • ' + news.date;
+                document.getElementById('newsDetailContent').textContent = news.content;
+                document.getElementById('newsDetailLink').href = news.link;
+                document.getElementById('newsDetailLink').style.display = news.link !== '#' ? 'inline-block' : 'none';
+                document.getElementById('newsModal').style.display = 'block';
+            }
+        }
+
+        function closeNewsModal() {
+            document.getElementById('newsModal').style.display = 'none';
+        }
+
+        // Warga Functions
+        function showFormWarga() {
+            document.getElementById('formWarga').style.display = 'block';
+        }
+
+        function hideFormWarga() {
+            document.getElementById('formWarga').style.display = 'none';
+            document.getElementById('wargaForm').reset();
+        }
+
+        function saveWarga(event) {
+            event.preventDefault();
+            const ttl = document.getElementById('ttlWarga').value;
+            const yearMatch = ttl.match(/(\d{4})/);
+            const usia = yearMatch ? 2025 - parseInt(yearMatch[1]) : null;
+            
+            const newWarga = {
+                id: Date.now(),
+                nama: document.getElementById('namaWarga').value,
+                jenisKelamin: document.getElementById('jenisKelaminWarga').value,
+                nik: document.getElementById('nikWarga').value,
+                noKK: document.getElementById('noKKWarga').value,
+                ttl: ttl,
+                usia: usia,
+                alamat: document.getElementById('alamatWarga').value,
+                kedudukan: document.getElementById('kedudukanWarga').value,
+                statusPernikahan: document.getElementById('statusPernikahanWarga').value,
+                agama: document.getElementById('agamaWarga').value,
+                pendidikan: document.getElementById('pendidikanWarga').value,
+                pekerjaan: document.getElementById('pekerjaanWarga').value,
+                noHP: document.getElementById('noHPWarga').value,
+                statusAlamat: document.getElementById('statusAlamatWarga').value,
+                keterangan: document.getElementById('keteranganWarga').value
+            };
+            
+            wargaData.push(newWarga);
+            filteredData = wargaData;
+            updateDashboard();
+            renderTable();
+            hideFormWarga();
+            alert('Data warga berhasil ditambahkan!');
+        }
+
+        // Surat Masuk Functions
+        function showFormSurat() {
+            document.getElementById('formSurat').style.display = 'block';
+        }
+
+        function hideFormSurat() {
+            document.getElementById('formSurat').style.display = 'none';
+            document.getElementById('suratForm').reset();
+        }
+
+        function saveSurat(event) {
+            event.preventDefault();
+            const fileInput = document.getElementById('fileSurat');
+            const file = fileInput.files[0];
+            
+            console.log('File selected:', file);
+            
+            const surat = {
+                id: Date.now(),
+                tanggal: document.getElementById('tglSurat').value,
+                nomor: document.getElementById('noSurat').value,
+                perihal: document.getElementById('perihal').value,
+                tujuan: document.getElementById('tujuan').value,
+                lampiran: document.getElementById('lampiran').value,
+                penandatangan: document.getElementById('penandatangan').value,
+                fileName: file ? file.name : '',
+                fileData: null
+            };
+
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    surat.fileData = e.target.result;
+                    console.log('File loaded, size:', surat.fileData.length);
+                    suratMasukData.push(surat);
+                    localStorage.setItem('suratMasukData', JSON.stringify(suratMasukData));
+                    renderSuratTable();
+                    hideFormSurat();
+                    alert('Surat berhasil disimpan dengan file!');
+                };
+                reader.onerror = function(e) {
+                    console.error('Error reading file:', e);
+                    alert('Gagal membaca file');
+                };
+                reader.readAsDataURL(file);
+            } else {
+                console.log('No file selected');
+                suratMasukData.push(surat);
+                localStorage.setItem('suratMasukData', JSON.stringify(suratMasukData));
+                renderSuratTable();
+                hideFormSurat();
+                alert('Surat berhasil disimpan tanpa file!');
+            }
+        }
+
+        function renderSuratTable() {
+            const tbody = document.querySelector('#suratTable tbody');
+            tbody.innerHTML = suratMasukData.slice().reverse().map((s, i) => {
+                let fileLink = '-';
+                if (s.fileData && s.fileName) {
+                    fileLink = '<a href="' + s.fileData + '" download="' + s.fileName + '" style="color: #3498db; text-decoration: underline; cursor: pointer;">Download</a> | <a onclick="viewFile(\'' + s.id + '\')" style="color: #27ae60; text-decoration: underline; cursor: pointer;">Lihat</a>';
+                }
+                return '<tr><td>' + (i + 1) + '</td><td>' + new Date(s.tanggal).toLocaleDateString('id-ID') + '</td><td>' + s.nomor + '</td><td>' + s.perihal + '</td><td>' + s.tujuan + '</td><td>' + s.lampiran + '</td><td>' + (s.penandatangan || '-') + '</td><td>' + fileLink + '</td><td><button onclick="deleteSurat(' + s.id + ')" style="background: #e74c3c; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer;">Hapus</button></td></tr>';
+            }).join('');
+        }
+
+        function viewFile(id) {
+            const surat = suratMasukData.find(s => s.id == id);
+            if (surat && surat.fileData) {
+                document.getElementById('fileViewer').src = surat.fileData;
+                document.getElementById('fileModal').style.display = 'block';
+            }
+        }
+
+        function closeFileModal() {
+            document.getElementById('fileModal').style.display = 'none';
+            document.getElementById('fileViewer').src = '';
+        }
+
+        function deleteSurat(id) {
+            if (confirm('Hapus surat ini?')) {
+                suratMasukData = suratMasukData.filter(s => s.id !== id);
+                localStorage.setItem('suratMasukData', JSON.stringify(suratMasukData));
+                renderSuratTable();
+            }
+        }
+
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+            document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+            event.target.classList.add('active');
+            if (pageId === 'suratMasuk') {
+                renderSuratTable();
+            }
+        }
+    </script>
+</body>
+</html>

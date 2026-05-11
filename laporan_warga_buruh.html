@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laporan Data Warga Bekerja sebagai Buruh - RT 04/RW 11</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2c3e50, #4a6491);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+        }
+        
+        .header p {
+            margin: 10px 0 0;
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            transition: transform 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .card h3 {
+            color: #2c3e50;
+            margin-top: 0;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #3498db;
+            margin: 10px 0;
+        }
+        
+        .stat-label {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+        
+        .data-table {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        th {
+            background-color: #3498db;
+            color: white;
+            padding: 12px 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+        
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        tr:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .badge-tetap {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .badge-sementara {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        
+        .badge-buruh {
+            background-color: #e3f2fd;
+            color: #1565c0;
+        }
+        
+        .badge-harian {
+            background-color: #f3e5f5;
+            color: #7b1fa2;
+        }
+        
+        .badge-lepas {
+            background-color: #e8f5e8;
+            color: #2e7d32;
+        }
+        
+        .charts {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .chart-container {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        .download-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            justify-content: center;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background-color: #3498db;
+            color: white;
+        }
+        
+        .btn-success {
+            background-color: #27ae60;
+            color: white;
+        }
+        
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+        
+        @media (max-width: 768px) {
+            .summary-cards {
+                grid-template-columns: 1fr;
+            }
+            
+            .charts {
+                grid-template-columns: 1fr;
+            }
+            
+            table {
+                font-size: 0.9rem;
+            }
+            
+            th, td {
+                padding: 8px 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📊 Laporan Data Warga Bekerja sebagai Buruh</h1>
+        <p>RT 04/RW 11 Kel. Jatihandap Kec. Mandalajati - Kota Bandung</p>
+        <p>Tanggal: 5 Mei 2026</p>
+    </div>
+    
+    <div class="summary-cards">
+        <div class="card">
+            <h3>Total Warga Buruh</h3>
+            <div class="stat-number">6</div>
+            <div class="stat-label">orang</div>
+        </div>
+        
+        <div class="card">
+            <h3>Jenis Kelamin</h3>
+            <div class="stat-number">6 Laki-laki</div>
+            <div class="stat-label">0 Perempuan</div>
+        </div>
+        
+        <div class="card">
+            <h3>Rata-rata Usia</h3>
+            <div class="stat-number">43.0</div>
+            <div class="stat-label">tahun</div>
+        </div>
+        
+        <div class="card">
+            <h3>Status Alamat</h3>
+            <div class="stat-number">4 SEMENTARA</div>
+            <div class="stat-label">2 TETAP</div>
+        </div>
+    </div>
+    
+    <div class="data-table">
+        <h2>📋 Daftar Warga Bekerja sebagai Buruh</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>No</th>
+                    <th>Nama</th>
+                    <th>Jenis Kelamin</th>
+                    <th>Usia</th>
+                    <th>Pekerjaan</th>
+                    <th>Alamat</th>
+                    <th>Pendidikan</th>
+                    <th>Status Alamat</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>4</td>
+                    <td><strong>Ade Rohman</strong></td>
+                    <td>L</td>
+                    <td>55</td>
+                    <td><span class="badge badge-buruh">Buruh</span></td>
+                    <td>-</td>
+                    <td>SD</td>
+                    <td><span class="badge badge-sementara">SEMENTARA</span></td>
+                </tr>
+                <tr>
+                    <td>5</td>
+                    <td><strong>Arif Nurachman</strong></td>
+                    <td>L</td>
+                    <td>44</td>
+                    <td><span class="badge badge-lepas">Buruh Harian Lepas</span></td>
+                    <td>Jl. Mandala VI No.130B</td>
+                    <td>SLTP</td>
+                    <td><span class="badge badge-tetap">TETAP</span></td>
+                </tr>
+                <tr>
+                    <td>14</td>
+                    <td><strong>Nyanyang Rustandi</strong></td>
+                    <td>L</td>
+                    <td>-</td>
+                    <td><span class="badge badge-harian">Buruh Harian</span></td>
+                    <td>Jl. Mandala VIII</td>
+                    <td>SLTP</td>
+                    <td><span class="badge badge-sementara">SEMENTARA</span></td>
+                </tr>
+                <tr>
+                    <td>17</td>
+                    <td><strong>Cecep Ahyar</strong></td>
+                    <td>L</td>
+                    <td>32</td>
+                    <td><span class="badge badge-harian">Buruh Harian</span></td>
+                    <td>Jl. Mandala VIII</td>
+                    <td>SD</td>
+                    <td><span class="badge badge-sementara">SEMENTARA</span></td>
+                </tr>
+                <tr>
+                    <td>124</td>
+                    <td><strong>Dedeng Syamhudi</strong></td>
+                    <td>L</td>
+                    <td>50</td>
+                    <td><span class="badge badge-lepas">Buruh Harian Lepas</span></td>
+                    <td>Jl. Mandala Vi No.132</td>
+                    <td>SLTP</td>
+                    <td><span class="badge badge-tetap">TETAP</span></td>
+                </tr>
+                <tr>
+                    <td>211</td>
+                    <td><strong>Dede Firman</strong></td>
+                    <td>L</td>
+                    <td>34</td>
+                    <td><span class="badge badge-lepas">Buruh Harian Lepas</span></td>
+                    <td>Jl. Inhoftank Gg. Perikanan 2</td>
+                    <td>SLTP</td>
+                    <td><span class="badge badge-sementara">SEMENTARA</span></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    
+    <div class="charts">
+        <div class="chart-container">
+            <h3>📈 Distribusi Jenis Pekerjaan Buruh</h3>
+            <div style="height: 250px; display: flex; align-items: center; justify-content: center; flex-direction: column;">
+                <div style="width: 100%; margin-bottom: 20px;">
+                    <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                        <div style="width: 20px; height: 20px; background-color: #1565c0; margin-right: 10px; border-radius: 3px;"></div>
+                        <div>Buruh: <strong>1 orang</strong> (16.7%)</div>
+                    </div>
+                    <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                        <div style="width: 20px; height: 20px; background-color: #7b1fa2; margin-right: 10px; border-radius: 3px;"></div>
+                        <div>Buruh Harian: <strong>2 orang</strong> (33.3%)</div>
+                    </div>
+                    <div style="display: flex; align-items: center;">
+                        <div style="width: 20px; height: 20px; background-color: #2e7d32; margin-right: 10px; border-radius: 3px;"></div>
+                        <div>Buruh Harian Lepas: <strong>3 orang</strong> (50.0%)</div>
+                    </div>
+                </div>
+                <div style="width: 200px; height: 200px; border-radius: 50%; background: conic-gradient(#1565c0 16.7%, #7b1fa2 33.3%, #2e7d32 50%);"></div>
+            </div>
+        </div>
+        
+        <div class="chart-container">
+            <h3>🎓 Tingkat Pendidikan</h3>
+            <div style="height: 250px; display: flex; align-items: center; justify-content: center; flex-direction: column;">
+                <div style="width: 100%;">
+                    <div style="margin-bottom: 15px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                            <span>SD</span>
+                            <span><strong>2 orang</strong> (33.3%)</span>
+                        </div>
+                        <div style="height: 20px; background-color: #e0e0e0; border-radius: 10px; overflow: hidden;">
+                            <div style="height: 100%; width: 33.3%; background-color: #3498db;"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                            <span>SLTP</span>
+                            <span><strong>4 orang</strong> (66.7%)</span>
+                        </div>
+                        <div style="height: 20px; background-color: #e0e0e0; border-radius: 10px; overflow: hidden;">
+                            <div style="height: 100%; width: 66.7%; background-color: #2ecc71;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="data-table">
+        <h2>📊 Analisis Data</h2>
+        <h3>Kesimpulan:</h3>
+        <ul>
+            <li><strong>Semua warga buruh adalah laki-laki</strong> (6 orang, 0 perempuan)</li>
+            <li><strong>Mayoritas bekerja sebagai Buruh Harian Lepas</strong> (3 orang, 50%)</li>
+            <li><strong>Rata-rata usia 43 tahun</strong> dengan rentang 32-55 tahun</li>
+            <li><strong>Sebagian besar berpendidikan SLTP</strong> (4 orang, 66.7%)</li>
+            <li><strong>Mayoritas berstatus alamat SEMENTARA</strong> (4 orang, 66.7%)</li>
+            <li><strong>Tidak ada warga buruh dengan status PINDAH atau MENINGGAL</strong></li>
+        </ul>
+        
+        <h3>Rekomendasi:</h3>
+        <ol>
+            <li>Perlu program pelatihan keterampilan untuk meningkatkan kualifikasi pekerjaan</li>
+            <li>Pertimbangkan program bantuan modal usaha untuk buruh harian lepas</li>
+            <li>Koordinasi dengan Dinas Tenaga Kerja untuk program sertifikasi keahlian</li>
+            <li>Program kesehatan khusus untuk pekerja buruh mengingat rata-rata usia yang sudah matang</li>
+        </ol>
+    </div>
+    
+    <div class="download-buttons">
+        <a href="warga_buruh.json" class="btn btn-primary" download>
+            <span>⬇️</span> Download Data JSON
+        </a>
+        <a href="warga_buruh.csv" class="btn btn-success" download>
+            <span>⬇️</span> Download Data CSV
+        </a>
+    </div>
+    
+    <div class="footer">
+        <p>Laporan ini dihasilkan secara otomatis dari Sistem Informasi RT 04/RW 11</p>
+        <p>© 2026 RT 04/RW 11 Kel. Jatihandap Kec. Mandalajati - Kota Bandung</p>
+    </div>
+</body>
+</html>

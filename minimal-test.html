@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Minimal RT04 Test</title>
+</head>
+<body>
+    <h1>RT04 Test</h1>
+    <button onclick="testFunction()">Test Menu</button>
+    <div id="result">No data loaded</div>
+    
+    <script>
+        function testFunction() {
+            alert('Menu is working!');
+        }
+        
+        fetch('data.json')
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('result').innerHTML = 'Data loaded: ' + data.length + ' records';
+            })
+            .catch(err => {
+                document.getElementById('result').innerHTML = 'Error: ' + err.message;
+            });
+    </script>
+</body>
+</html>

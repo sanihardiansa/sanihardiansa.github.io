@@ -1,0 +1,14 @@
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle -->
+  <circle cx="100" cy="100" r="95" fill="#2c3e50" stroke="#3498db" stroke-width="3"/>
+  
+  <!-- RT text -->
+  <text x="100" y="90" font-size="48" font-weight="bold" fill="#3498db" text-anchor="middle" font-family="Arial, sans-serif">RT</text>
+  
+  <!-- 04 text -->
+  <text x="100" y="130" font-size="36" font-weight="bold" fill="#2ecc71" text-anchor="middle" font-family="Arial, sans-serif">04</text>
+  
+  <!-- Decorative elements -->
+  <circle cx="100" cy="100" r="100" fill="none" stroke="#ecf0f1" stroke-width="2"/>
+  <circle cx="100" cy="100" r="90" fill="none" stroke="#34495e" stroke-width="1" stroke-dasharray="5,5"/>
+</svg>

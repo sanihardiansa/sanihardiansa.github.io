@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Surat Pengantar - RT04</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
+        .form-group { margin-bottom: 10px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, textarea { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; border: none; border-radius: 5px; }
+        .btn-primary { background: #3498db; color: white; }
+        .btn-success { background: #27ae60; color: white; }
+        .btn-secondary { background: #95a5a6; color: white; }
+        .form-container { background: #f9f9f9; padding: 20px; border-radius: 10px; margin: 20px 0; }
+        .surat-result { background: white; padding: 30px; border: 1px solid #ddd; margin: 20px 0; }
+    </style>
+</head>
+<body>
+    <h1>Surat Pengantar RT04</h1>
+    
+    <div class="form-container">
+        <h3>Form Surat Pengantar</h3>
+        
+        <div class="form-grid">
+            <div class="form-group">
+                <label>Nama Warga:</label>
+                <input type="text" id="namaWarga" value="Hj. Nina Viborgitawaty, SH.">
+            </div>
+            <div class="form-group">
+                <label>Jenis Kelamin:</label>
+                <input type="text" id="jenisKelamin" value="Perempuan">
+            </div>
+            <div class="form-group">
+                <label>Tempat Tanggal Lahir:</label>
+                <input type="text" id="tempatTanggalLahir" value="Bandung, 20 Januari 1963">
+            </div>
+            <div class="form-group">
+                <label>Pekerjaan:</label>
+                <input type="text" id="pekerjaan" value="Wiraswasta">
+            </div>
+            <div class="form-group">
+                <label>Alamat:</label>
+                <input type="text" id="alamat" value="Jl. Mandala VI No. 130B, RT04 RW 11 Kel. Jatihandap Kec. Mandalajati Kota Bandung">
+            </div>
+            <div class="form-group">
+                <label>Nomor Kartu Keluarga:</label>
+                <input type="text" id="noKK" value="3273300311140007">
+            </div>
+            <div class="form-group">
+                <label>NIK:</label>
+                <input type="text" id="nik" value="3273306001630001">
+            </div>
+            <div class="form-group">
+                <label>Status:</label>
+                <input type="text" id="status" value="Janda">
+            </div>
+            <div class="form-group">
+                <label>Maksud dan Tujuan:</label>
+                <textarea id="maksudTujuan" rows="3">Pembuatan KTP</textarea>
+            </div>
+            <div class="form-group">
+                <label>Catatan:</label>
+                <textarea id="catatan" rows="3" placeholder="Masukkan catatan..."></textarea>
+            </div>
+            <div class="form-group">
+                <label>Tanggal Surat:</label>
+                <input type="date" id="tanggalSurat" value="2025-12-16">
+            </div>
+            <div class="form-group">
+                <label>Kota Lokasi:</label>
+                <input type="text" id="kotaLokasi" value="Bandung">
+            </div>
+        </div>
+        
+        <div>
+            <button onclick="buatSurat()" class="btn-success">Buat Surat</button>
+            <button onclick="resetForm()" class="btn-secondary">Reset</button>
+        </div>
+    </div>
+    
+    <div id="hasilSurat"></div>
+    
+    <script>
+        function buatSurat() {
+            const data = {
+                namaWarga: document.getElementById('namaWarga').value,
+                jenisKelamin: document.getElementById('jenisKelamin').value,
+                tempatTanggalLahir: document.getElementById('tempatTanggalLahir').value,
+                pekerjaan: document.getElementById('pekerjaan').value,
+                alamat: document.getElementById('alamat').value,
+                noKK: document.getElementById('noKK').value,
+                nik: document.getElementById('nik').value,
+                status: document.getElementById('status').value,
+                maksudTujuan: document.getElementById('maksudTujuan').value,
+                catatan: document.getElementById('catatan').value,
+                tanggalSurat: document.getElementById('tanggalSurat').value,
+                kotaLokasi: document.getElementById('kotaLokasi').value
+            };
+            
+            tampilkanSurat(data);
+        }
+        
+        function tampilkanSurat(data) {
+            const tanggal = new Date(data.tanggalSurat);
+            const bulan = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+            const tanggalFormat = tanggal.getDate() + ' ' + bulan[tanggal.getMonth()] + ' ' + tanggal.getFullYear();
+            
+            const nomorSurat = generateNomorSurat();
+            
+            const html = `
+                <div class="surat-result" style="font-family: Arial, sans-serif; line-height: 1.4;">
+                    <div style="text-align: center; margin-bottom: 20px;">
+                        <h3 style="margin: 0; font-size: 16px; font-weight: bold;">RUKUN TETANGGA 04 RUKUN WARGA 011</h3>
+                        <p style="margin: 2px 0; font-size: 14px;">KELURAHAN JATIHANDAP – KECAMATAN MANDALAJATI – KOTA BANDUNG</p>
+                        <p style="margin: 2px 0; font-size: 12px;">Sekreteriat : Jl. Mandala VII No. 135 Telepon : 08122005343</p>
+                    </div>
+                    
+                    <div style="text-align: center; margin: 30px 0;">
+                        <h3 style="margin: 0; text-decoration: underline; font-size: 16px;">SURAT PENGANTAR</h3>
+                        <p style="margin: 5px 0; font-size: 14px;">NO : ${nomorSurat}</p>
+                    </div>
+                    
+                    <p style="text-align: justify; margin-bottom: 20px;">Pengurus RT 04 RW 11 Kelurahan Jatihandap Kecamatan Mandalajati Kota Bandung, dengan ini menerangkan bahwa :</p>
+                    
+                    <table style="width: 100%; margin: 20px 0; border-collapse: collapse; font-size: 14px;">
+                        <tr><td width="180" style="padding: 4px 0; vertical-align: top;">Nama</td><td width="20" style="padding: 4px 0;">:</td><td style="padding: 4px 0;">${data.namaWarga}</td></tr>
+                        <tr><td style="padding: 4px 0; vertical-align: top;">Jenis Kelamin</td><td style="padding: 4px 0;">:</td><td style="padding: 4px 0;">${data.jenisKelamin}</td></tr>
+                        <tr><td style="padding: 4px 0; vertical-align: top;">Tempat/Tgl Lahir</td><td style="padding: 4px 0;">:</td><td style="padding: 4px 0;">${data.tempatTanggalLahir}</td></tr>
+                        <tr><td style="padding: 4px 0; vertical-align: top;">Pekerjaan</td><td style="padding: 4px 0;">:</td><td style="padding: 4px 0;">${data.pekerjaan}</td></tr>
+                        <tr><td style="padding: 4px 0; vertical-align: top;">Alamat & No Hp/WA</td><td style="padding: 4px 0;">:</td><td style="padding: 4px 0;">${data.alamat}</td></tr>
+                        <tr><td style="padding: 4px 0; vertical-align: top;">Nomor Kartu Keluarga</td><td style="padding: 4px 0;">:</td><td style="padding: 4px 0;">${data.noKK}</td></tr>
+                        <tr><td style="padding: 4px 0; vertical-align: top;">Nomor KTP</td><td style="padding: 4px 0;">:</td><td style="padding: 4px 0;">${data.nik}</td></tr>
+                        <tr><td style="padding: 4px 0; vertical-align: top;">Status</td><td style="padding: 4px 0;">:</td><td style="padding: 4px 0;">${data.status}</td></tr>
+                        <tr><td style="padding: 4px 0; vertical-align: top;">Maksud dan Tujuan</td><td style="padding: 4px 0;">:</td><td style="padding: 4px 0;">${data.maksudTujuan}</td></tr>
+                        ${data.catatan ? `<tr><td style="padding: 4px 0; vertical-align: top;">Catatan</td><td style="padding: 4px 0;">:</td><td style="padding: 4px 0;">• ${data.catatan}</td></tr>` : ''}
+                    </table>
+                    
+                    <p style="text-align: justify; margin: 30px 0 40px 0;">Demikian agar yang berkepentingan menjadi maklum dan mohon pertimbangannya</p>
+                    
+                    <div style="display: flex; justify-content: space-between; margin-top: 50px;">
+                        <div style="text-align: center; width: 45%;">
+                            <p style="margin: 0;">Mengetahui</p>
+                            <p style="margin: 5px 0;">Ketua RW 11</p>
+                            <br>
+                            <div style="height: 80px; margin: 10px 0;"></div>
+                            <p style="margin: 0; text-decoration: underline;">(Achmad Wanen Sadikin, ST)</p>
+                        </div>
+                        <div style="text-align: center; width: 45%;">
+                            <p style="margin: 0;">${data.kotaLokasi}, ${tanggalFormat}</p>
+                            <p style="margin: 5px 0;">Ketua RT 04</p>
+                            <br>
+                            <img src="TTD Sani 1.png" alt="Tanda Tangan" style="height: 80px; margin: 10px 0;">
+                            <p style="margin: 0; text-decoration: underline;">(Sani Hardiansa)</p>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 30px; text-align: center;">
+                        <button onclick="printSurat()" class="btn-primary">Print Surat</button>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('hasilSurat').innerHTML = html;
+        }
+        
+        function generateNomorSurat() {
+            const tahun = new Date().getFullYear();
+            let counter = parseInt(localStorage.getItem('suratPengantarCounter') || '0') + 1;
+            localStorage.setItem('suratPengantarCounter', counter.toString());
+            return String(counter).padStart(3, '0') + '/RT04/RW11/' + tahun;
+        }
+        
+        function resetForm() {
+            document.getElementById('maksudTujuan').value = '';
+            document.getElementById('catatan').value = '';
+            document.getElementById('hasilSurat').innerHTML = '';
+        }
+        
+        function printSurat() {
+            const suratContent = document.getElementById('hasilSurat').innerHTML;
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                <head><title>Surat Pengantar</title></head>
+                <body>${suratContent}</body>
+                </html>
+            `);
+            printWindow.document.close();
+            printWindow.print();
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,29 @@
+[
+  {
+    "no_kk": "3273730009172007",
+    "alamat": "JL. MANDALA VI",
+    "rt": "04",
+    "rw": "11",
+    "kelurahan": "JATIHANDAP",
+    "kecamatan": "MANDALAJATI",
+    "kabupaten": "KOTA BANDUNG",
+    "provinsi": "JAWA BARAT",
+    "tanggal_cetak": "08-12-2024",
+    "anggota_keluarga": [
+      {
+        "no": 1,
+        "nik": "",
+        "nama": "",
+        "jenis_kelamin": "",
+        "tempat_lahir": "",
+        "tanggal_lahir": "",
+        "agama": "",
+        "pendidikan": "",
+        "pekerjaan": "",
+        "status_perkawinan": "",
+        "status_hubungan": "Kepala Keluarga",
+        "kewarganegaraan": "WNI"
+      }
+    ]
+  }
+]
